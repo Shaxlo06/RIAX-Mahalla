@@ -11,6 +11,7 @@
     "test:responsive": "playwright test",
     "import:excel": "tsx scripts/import-riax.ts",
     "import:faculty": "node scripts/import-faculty.mjs",
+    "import:academic": "node scripts/import-academic-sources.mjs",
     "seed:sql": "tsx scripts/import-riax.ts --sql-only",
     "locations:sync": "tsx scripts/build-mahalla-locations.ts"
   },

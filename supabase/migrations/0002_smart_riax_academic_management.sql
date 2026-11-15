@@ -390,6 +390,7 @@ do $$ declare t text; begin
     'internship_assignments','internship_reports','graduation_theses','thesis_milestones',
     'attestation_commissions','attestation_results'
   ] loop
+    execute format('drop trigger if exists %I on public.%I', 'touch_'||t, t);
     execute format('create trigger %I before update on public.%I for each row execute function public.touch_updated_at()', 'touch_'||t, t);
   end loop;
 end $$;
@@ -512,7 +513,7 @@ language plpgsql security definer set search_path=public as $$
 declare record_id uuid;
 begin
   record_id := case when tg_op='DELETE' then old.id else new.id end;
-  insert into public.audit_logs(actor_id,action,entity_type,entity_id,old_data,new_data)
+  insert into public.audit_logs(user_id,action,entity_type,entity_id,old_values,new_values)
   values(auth.uid(),lower(tg_op),tg_table_name,record_id,
     case when tg_op in ('UPDATE','DELETE') then to_jsonb(old) else null end,
     case when tg_op in ('INSERT','UPDATE') then to_jsonb(new) else null end);
@@ -526,6 +527,7 @@ do $$ declare t text; begin
     'quality_reviews','ai_usage_declarations','internship_assignments','internship_reports',
     'graduation_theses','thesis_milestones','attestation_commissions','attestation_results'
   ] loop
+    execute format('drop trigger if exists %I on public.%I', 'audit_'||t, t);
     execute format('create trigger %I after insert or update or delete on public.%I for each row execute function public.log_smart_riax_change()', 'audit_'||t, t);
   end loop;
 end $$;

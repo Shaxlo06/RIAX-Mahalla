@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { SmartRecord } from "@/types/smart-domain";
 import facultySeed from "@/data/faculty-profiles.json";
+import academicSeed from "@/data/imported-academic-data.json";
 
 const eventName = "smart-riax-data-change";
 
@@ -11,15 +12,23 @@ function storageKey(table: string) {
   return `smart-riax:${table}`;
 }
 
+const baselineByTable: Record<string, SmartRecord[]> = {
+  faculty_profiles: facultySeed.faculty as unknown as SmartRecord[],
+  internship_assignments: academicSeed.internship_assignments as unknown as SmartRecord[],
+  graduation_theses: academicSeed.graduation_theses as unknown as SmartRecord[],
+  master_dissertations: academicSeed.master_dissertations as unknown as SmartRecord[],
+  attestation_candidates: academicSeed.attestation_candidates as unknown as SmartRecord[],
+  fourth_year_contingent: academicSeed.fourth_year_contingent as unknown as SmartRecord[],
+};
+
 function readLocal<T extends SmartRecord>(table: string): T[] {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey(table)) || "[]") as T[];
-    if (table !== "faculty_profiles") return stored;
     const existingIds = new Set(stored.map((row) => row.id));
-    const baseline = facultySeed.faculty as unknown as T[];
+    const baseline = (baselineByTable[table] || []) as T[];
     return [...stored, ...baseline.filter((row) => !existingIds.has(row.id))];
   } catch {
-    return table === "faculty_profiles" ? facultySeed.faculty as unknown as T[] : [];
+    return (baselineByTable[table] || []) as T[];
   }
 }
 
@@ -126,4 +135,14 @@ export async function downloadExcel(fileName: string, sheetName: string, rows: S
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName.slice(0, 31));
   XLSX.writeFile(workbook, fileName);
+}
+
+export function printPdfReport(title: string, rows: SmartRecord[], columns: string[]) {
+  const report = window.open("", "_blank", "width=1100,height=800");
+  if (!report) throw new Error("Hisobot oynasi bloklandi. Brauzerda pop-up oynalarga ruxsat bering.");
+  const escape = (value: unknown) => String(value ?? "—")
+    .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+  report.document.write(`<!doctype html><html lang="uz"><head><meta charset="utf-8"><title>${escape(title)}</title><style>
+    @page{size:A4 landscape;margin:12mm}body{font-family:Arial,sans-serif;color:#10264d}h1{font-size:20px;margin:0 0 6px}p{font-size:11px;color:#5d6b82;margin:0 0 16px}table{width:100%;border-collapse:collapse;font-size:9px}th,td{border:1px solid #cad6e6;padding:6px;text-align:left;vertical-align:top}th{background:#08265f;color:white}tr:nth-child(even){background:#f4f8fd}</style></head><body><h1>${escape(title)}</h1><p>${new Date().toLocaleString("uz-UZ")} · ${rows.length} ta yozuv</p><table><thead><tr>${columns.map((column)=>`<th>${escape(column)}</th>`).join("")}</tr></thead><tbody>${rows.map((row)=>`<tr>${columns.map((column)=>`<td>${escape(row[column])}</td>`).join("")}</tr>`).join("")}</tbody></table><script>window.onload=()=>window.print()</script></body></html>`);
+  report.document.close();
 }

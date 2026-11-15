@@ -28,7 +28,15 @@ export const primaryNavigation: NavItem[] = [
     ],
   },
   { label: "Ilmiy nashrlar", href: "/publications", icon: BookOpenCheck },
-  { label: "Dars jarayoni", href: "/teaching", icon: Presentation },
+  {
+    label: "Dars jarayoni",
+    href: "/teaching/lectures",
+    icon: Presentation,
+    children: [
+      { label: "Ma’ruza", href: "/teaching/lectures" },
+      { label: "Seminar/Amaliyot", href: "/teaching/practice" },
+    ],
+  },
   { label: "Ta’lim sifati", href: "/quality", icon: BadgeCheck },
   {
     label: "Bitiruvchilar",
@@ -38,6 +46,7 @@ export const primaryNavigation: NavItem[] = [
       { label: "Amaliyot", href: "/graduates/internships" },
       { label: "BMI", href: "/graduates/theses" },
       { label: "YADK", href: "/graduates/attestation" },
+      { label: "Magistr", href: "/graduates/masters" },
     ],
   },
 ];

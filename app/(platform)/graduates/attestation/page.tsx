@@ -1,3 +1,3 @@
-import { AttestationWorkspace } from "@/components/smart-riax/workspaces";
+import { AttestationCandidatesWorkspace } from "@/components/smart-riax/research-monitoring";
 export const metadata={title:"YADK"};
-export default function Page(){return <AttestationWorkspace/>}
+export default function Page(){return <AttestationCandidatesWorkspace/>}

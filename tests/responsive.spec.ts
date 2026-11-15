@@ -7,7 +7,7 @@ const credentials: Record<Role,{email:string;home:string}> = {
   quality:{email:"sifat@riax.uz",home:"/admin"}, research:{email:"nashr@riax.uz",home:"/admin"},
   graduate:{email:"bitiruvchi@riax.uz",home:"/admin"}, student:{email:"talaba@riax.uz",home:"/student"},
 };
-const commonRoutes=["/faculty","/faculty/certificates","/faculty/development","/publications","/publications/faculty","/publications/analytics","/publications/import","/teaching","/teaching/materials","/teaching/lessons","/teaching/portfolio","/quality","/quality/lessons","/quality/ai","/quality/actions","/graduates/internships","/graduates/theses","/graduates/attestation"];
+const commonRoutes=["/faculty","/faculty/certificates","/faculty/development","/publications","/publications/faculty","/publications/analytics","/publications/import","/teaching","/teaching/lectures","/teaching/practice","/teaching/materials","/teaching/lessons","/teaching/portfolio","/quality","/quality/lessons","/quality/ai","/quality/actions","/graduates/internships","/graduates/theses","/graduates/attestation","/graduates/masters"];
 const viewportWidths=[320,375,390,430,768,1024,1366,1440,1920];
 const screenshotWidths=new Set([390,768,1440]);
 mkdirSync("artifacts/screenshots",{recursive:true});
@@ -47,7 +47,7 @@ test("sidebar accordion submenyulari va TDIU rasmi ishlaydi",async({page})=>{
   await expect(faculty).toHaveAttribute("aria-expanded","false");await faculty.click();await expect(faculty).toHaveAttribute("aria-expanded","true");
   await expect(sidebar.getByRole("link",{name:"Malaka oshirish"})).toBeVisible();await sidebar.getByRole("link",{name:"Sertifikatlar"}).click();await expect(page).toHaveURL(/\/faculty\/certificates$/);
   const graduates=sidebar.getByRole("button",{name:/Bitiruvchilar/});await graduates.click();await expect(graduates).toHaveAttribute("aria-expanded","true");
-  await expect(sidebar.getByRole("link",{name:"Amaliyot"})).toBeVisible();await expect(sidebar.getByRole("link",{name:"BMI"})).toBeVisible();await expect(sidebar.getByRole("link",{name:"YADK"})).toBeVisible();
+  await expect(sidebar.getByRole("link",{name:"Amaliyot",exact:true})).toBeVisible();await expect(sidebar.getByRole("link",{name:"BMI",exact:true})).toBeVisible();await expect(sidebar.getByRole("link",{name:"YADK",exact:true})).toBeVisible();await expect(sidebar.getByRole("link",{name:"Magistr",exact:true})).toBeVisible();
   await sidebar.getByRole("link",{name:"BMI"}).click();await expect(page).toHaveURL(/\/graduates\/theses$/);
   await expect(sidebar.getByRole("img",{name:"Toshkent davlat iqtisodiyot universiteti binosi"})).toBeVisible();await expect(sidebar.getByText("5 yo‘nalishli monitoring")).toHaveCount(0);
   await noOverflow(page);await page.screenshot({path:"artifacts/screenshots/sidebar-desktop-1440.png",fullPage:true,animations:"disabled"});
@@ -62,7 +62,7 @@ test("asosiy CRUD oqimlari demo saqlash bilan ishlaydi",async({page})=>{
   await page.goto("/faculty");await page.getByRole("button",{name:"Yangi yozuv"}).click();await page.getByLabel("F.I.Sh. *").fill("Test Professor");await page.getByLabel("Lavozim *").fill("Dotsent");await page.getByLabel("Bandlik holati *").selectOption("active");await page.getByLabel("Kafedra *").fill("RIAX");await page.getByRole("button",{name:"Saqlash"}).click();await page.getByPlaceholder("Barcha maydonlar bo‘yicha qidirish...").fill("Test Professor");await expect(page.getByText("Test Professor")).toBeVisible();
   await page.goto("/publications");await page.getByRole("button",{name:"Yangi yozuv"}).first().click();await page.getByLabel("Maqola nomi *").fill("Tekshiruv nashri");await page.getByLabel("Mualliflar *").fill("Test Professor");await page.getByLabel("Jurnal yoki konferensiya *").fill("Sinov jurnali");await page.getByLabel("Nashr yili *").fill("2026");await page.getByRole("button",{name:"Saqlash"}).click();await expect(page.getByText("Tekshiruv nashri")).toBeVisible();
   await page.goto("/quality/ai");await page.getByRole("button",{name:"Yangi yozuv"}).click();await page.getByLabel("Material ID *").fill("demo-material");await page.getByLabel("Professor-o‘qituvchi ID *").fill("demo-faculty");await page.getByLabel("AI vositasi toifasi *").fill("Matn yordamchisi");await page.getByLabel("Foydalanish maqsadi *").fill("Tuzilmani taklif qilish, inson tomonidan tekshirilgan");await page.getByRole("button",{name:"Saqlash"}).click();await expect(page.getByText("Matn yordamchisi")).toBeVisible();
-  await page.goto("/graduates/internships");await page.getByRole("button",{name:"Yangi yozuv"}).first().click();await page.getByLabel("Talaba ID *").fill("demo-student");await page.getByLabel("Talaba F.I.Sh. *").fill("Test Talaba");await page.getByLabel("Akademik guruh *").fill("DI-01");await page.getByLabel("Amaliyot tashkiloti *").fill("TSUE");await page.getByLabel("Boshlanish *").fill("2026-01-10");await page.getByLabel("Yakun *").fill("2026-03-10");await page.getByRole("button",{name:"Saqlash"}).click();await expect(page.getByText("Test Talaba")).toBeVisible();
+  await page.goto("/graduates/internships");await page.getByRole("button",{name:"Yangi yozuv"}).first().click();await page.getByLabel("Talaba ID *").fill("demo-student");await page.getByLabel("Talaba F.I.Sh. *").fill("Test Talaba");await page.getByLabel("Guruh *").fill("DI-01");await page.getByLabel("Amaliyot tashkiloti *").fill("TSUE");await page.getByLabel("Boshlanish sanasi").fill("2026-01-10");await page.getByLabel("Tugash sanasi").fill("2026-03-10");await page.getByRole("button",{name:"Saqlash"}).click();await page.getByPlaceholder("Barcha maydonlar bo‘yicha qidirish...").first().fill("Test Talaba");await expect(page.getByText("Test Talaba")).toBeVisible();
 });
 
 test("fayl tanlash va portfolio PDF eksporti ishlaydi",async({page})=>{
@@ -76,7 +76,7 @@ test("Scopus Excel manbasidagi barcha professorlar ko‘rsatiladi",async({page})
   await expect(page.getByText("Scopus ID va havola mos").locator("..").getByText("34",{exact:true})).toBeVisible();
   await page.screenshot({path:"artifacts/screenshots/faculty-registry-1440.png",fullPage:true,animations:"disabled"});
   const search=page.getByPlaceholder("Barcha maydonlar bo‘yicha qidirish...");await search.fill("Madyarova Muxlisa");
-  await expect(page.getByText("Madyarova Muxlisa Abdulla qizi")).toBeVisible();await expect(page.getByRole("table").getByText("Tekshiruv kerak")).toBeVisible();
+  await expect(page.getByText("Madyarova Muxlisa Abdulla qizi")).toBeVisible();await expect(page.getByText("Tekshiruv kerak")).toBeVisible();
   await expect(page.getByRole("link",{name:/60647745100/})).toHaveAttribute("href",/authorId=60647406000/);
 });
 

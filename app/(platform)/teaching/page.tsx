@@ -1,3 +1,2 @@
-import { SubjectWorkspace } from "@/components/smart-riax/workspaces";
-export const metadata={title:"Fanlar"};
-export default function Page(){return <SubjectWorkspace/>}
+import { redirect } from "next/navigation";
+export default function Page(){redirect("/teaching/lectures")}

@@ -12,7 +12,7 @@ Platformada aynan beshta asosiy menyu mavjud:
 2. **Ilmiy nashrlar** — nashr reyestri, hammualliflik, DOI/Crossref, Excel/CSV import, Scopus/WoS identifikatorlari va unique analitika.
 3. **Dars jarayoni** — fan va yuklama, o‘quv materiallari va versiyalari, dars reyestri, foydalanish dalillari, PDF/ZIP portfolio.
 4. **Ta’lim sifati** — mezonli cheklist, ball va izoh, tuzatish choralari, AI yordamidan foydalanish deklaratsiyasi.
-5. **Bitiruvchilar** — aynan uchta ichki bo‘lim: Amaliyot, BMI va YADK.
+5. **Bitiruvchilar** — to‘rtta ichki bo‘lim: Amaliyot, BMI, YADK va Magistr.
 
 SMART RIAX logosi dashboard bosh sahifasiga olib boradi. Eski talaba–mahalla route va ma’lumotlari tarixiy moslik uchun saqlangan, ammo asosiy menyudan chiqarilgan.
 
@@ -71,10 +71,14 @@ SQL Editor yoki migratsiya vositasi orqali tartib bilan bajaring:
 1. `supabase/migrations/0001_initial.sql`
 2. `supabase/migrations/0002_smart_riax_academic_management.sql`
 3. `supabase/migrations/0003_faculty_scopus_import.sql`
-4. `supabase/faculty-seed.sql`
-5. Zarur bo‘lsa tarixiy talaba ma’lumotlari uchun `supabase/seed.sql`
+4. `supabase/migrations/0004_department_monitoring_core.sql`
+5. `supabase/faculty-seed.sql`
+6. `supabase/imports/academic-source-data.sql`
+7. Zarur bo‘lsa tarixiy talaba ma’lumotlari uchun `supabase/seed.sql`
 
 Ikkinchi migratsiya eski jadvallarni o‘chirmaydi. U yangi rollar, akademik domen jadvallari, indekslar, RLS siyosatlari, audit triggerlari, professional rivojlanish bildirishnomasi funksiyasi va `smart-riax-documents` yopiq Storage bucketini qo‘shadi.
+
+To‘rtinchi migratsiya ham additiv va qayta qo‘llashga xavfsiz tuzilgan. U ilmiy identifikatorlar, provayderlar kesimidagi bibliometriya, davomat, magistrlik dissertatsiyalari, to‘qqiz bosqichli ilmiy ish monitoringi va YADK nomzodlarini qo‘shadi. Production bazaga qo‘llashdan oldin Supabase backup oling; import SQL mavjud yozuvlarni o‘chirmaydi va barqaror UUID bo‘yicha upsert qiladi.
 
 Professor-o‘qituvchilar reyestri `../RIAX/Scopus ID RIAX.xlsx` manbasidan shakllantiriladi:
 
@@ -83,6 +87,14 @@ npm run import:faculty
 ```
 
 Buyruq 51 nafar xodimni tahlil qiladi, `data/faculty-profiles.json` va `supabase/faculty-seed.sql` fayllarini yangilaydi. Supabase environment mavjud bo‘lsa yozuvlarni nomi yoki manba qatori bo‘yicha xavfsiz upsert qiladi. Manbada 34 ta ID profil havolasi bilan mos, 16 ta profil mavjud emas va 1 ta ID/havola konflikti inson tekshiruvi uchun belgilangan.
+
+Qolgan akademik manbalarni qayta generatsiya qilish:
+
+```bash
+npm run import:academic -- --source-dir="C:\\path\\to\\RIAX" --contingent="C:\\path\\to\\Bitiruvchi 2025-2026.xlsx"
+```
+
+Buyruq Excel/Word manbalarini o‘qib, `data/imported-academic-data.json` va `supabase/imports/academic-source-data.sql` yaratadi. Joriy manbalardan 168 amaliyot yozuvi, 68 BMI, 21 magistr va 88 ta tekshiruv talab qiluvchi YADK nomzodi olindi. 4-kurs kontingentida BMI bilan ishonchli bog‘lash uchun umumiy ID/guruh topilmagani sabab YADK ro‘yxati to‘liq deb belgilanmaydi va 88 yozuvning barchasi admin tasdig‘iga yuboriladi.
 
 Production auth foydalanuvchisi uchun `public.users.id` va Supabase Auth `auth.users.id` bir xil UUID bo‘lishi, `role` esa ruxsat etilgan yangi rollardan biri bo‘lishi kerak.
 
@@ -135,7 +147,7 @@ app/(platform)/faculty/       professor-o‘qituvchilar moduli
 app/(platform)/publications/  ilmiy nashrlar va import
 app/(platform)/teaching/      dars jarayoni va portfolio
 app/(platform)/quality/       ta’lim sifati va AI deklaratsiyasi
-app/(platform)/graduates/     Amaliyot, BMI, YADK
+app/(platform)/graduates/     Amaliyot, BMI, YADK, Magistr va 9 bosqichli monitoring
 components/smart-riax/        umumiy CRUD va modul workspacelari
 lib/smart-data.ts             Supabase/local demo persistence, upload, Excel
 supabase/migrations/          xavfsiz SQL migratsiyalar va RLS
@@ -147,3 +159,4 @@ tests/responsive.spec.ts      responsive va funksional Playwright testlari
 - Rasmiy Scopus/WoS avtomatik sinxronlash uchun tashkilot API credential va obunasi kerak.
 - AI indikatori mualliflik isboti emas; platforma uni faqat inson tekshiruvini talab qiluvchi noaniq signal sifatida saqlaydi.
 - YADK baholari, plagiat natijalari va indeksatsiya holatlari platforma tomonidan avtomatik to‘qilmaydi yoki belgilanmaydi.
+- Productionda demo login sukut bo‘yicha bloklangan. Uni ataylab yoqish uchun ham `NEXT_PUBLIC_DEMO_MODE=true`, ham `NEXT_PUBLIC_ALLOW_PRODUCTION_DEMO_AUTH=true` talab qilinadi; maxfiy ma’lumotli muhitda bu override ishlatilmasin.

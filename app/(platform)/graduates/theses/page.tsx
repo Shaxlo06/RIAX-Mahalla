@@ -1,3 +1,3 @@
-import { ThesisWorkspace } from "@/components/smart-riax/workspaces";
+import { ResearchWorkDashboard } from "@/components/smart-riax/research-monitoring";
 export const metadata={title:"BMI"};
-export default function Page(){return <ThesisWorkspace/>}
+export default function Page(){return <ResearchWorkDashboard mode="thesis"/>}

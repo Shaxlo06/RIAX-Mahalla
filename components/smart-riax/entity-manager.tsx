@@ -1,15 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Database, ExternalLink, Eye, FileSpreadsheet, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Database, ExternalLink, Eye, FileDown, FileSpreadsheet, Pencil, Plus, Search, Trash2, Upload } from "lucide-react";
 import { useRole } from "@/components/auth/role-context";
 import { Modal } from "@/components/ui/modal";
 import { PageHeader } from "@/components/ui/page-header";
-import { downloadExcel, uploadSmartDocument, useSmartCollection } from "@/lib/smart-data";
+import { downloadExcel, printPdfReport, uploadSmartDocument, useSmartCollection } from "@/lib/smart-data";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { SmartField, SmartModuleKey, SmartRecord, SmartValue } from "@/types/smart-domain";
 
-type Props = { table: string; moduleKey: SmartModuleKey; title: string; eyebrow: string; description: string; fields: SmartField[]; columns: string[]; statusKey?: string; storageFolder?: string; pageSize?: number };
+type Props = { table: string; moduleKey: SmartModuleKey; title: string; eyebrow: string; description: string; fields: SmartField[]; columns: string[]; statusKey?: string; storageFolder?: string; pageSize?: number; profileLinkBase?: string; recordFilter?: (row: SmartRecord) => boolean; createDefaults?: SmartRecord };
 const arrayFields = new Set(["teaching_subjects", "professional_qualifications", "members"]);
 const jsonFields = new Set(["evidence", "evaluation_records", "checklist", "schedule"]);
 
@@ -34,7 +35,7 @@ function displayValue(value: SmartValue, field?: SmartField) {
   return String(value);
 }
 
-export function EntityManager({ table, moduleKey, title, eyebrow, description, fields, columns, statusKey, storageFolder, pageSize = 8 }: Props) {
+export function EntityManager({ table, moduleKey, title, eyebrow, description, fields, columns, statusKey, storageFolder, pageSize = 8, profileLinkBase, recordFilter, createDefaults }: Props) {
   const { role, userId, canManage } = useRole();
   const manager = canManage(moduleKey);
   const { rows, loading, error, databaseMode, create, update, remove } = useSmartCollection<SmartRecord>(table);
@@ -54,16 +55,17 @@ export function EntityManager({ table, moduleKey, title, eyebrow, description, f
   const filtered = useMemo(() => {
     const normalizedQuery = query.toLocaleLowerCase("uz");
     return rows
+      .filter((row) => recordFilter ? recordFilter(row) : true)
       .filter((row) => !normalizedQuery || Object.values(row).some((value) => String(value ?? "").toLocaleLowerCase("uz").includes(normalizedQuery)))
       .filter((row) => status === "all" || String(row[statusKey || ""] ?? "") === status)
       .sort((a, b) => String(a[sortKey] ?? "").localeCompare(String(b[sortKey] ?? ""), "uz") * (ascending ? 1 : -1));
-  }, [ascending, query, rows, sortKey, status, statusKey]);
+  }, [ascending, query, rows, sortKey, status, statusKey, recordFilter]);
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, pageCount);
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   function startEdit(row?: SmartRecord) {
-    const initial: SmartRecord = row ? { ...row } : { id: "" };
+    const initial: SmartRecord = row ? { ...row } : { id: "", ...(createDefaults || {}) };
     if (!row && table === "scientific_publications") initial.submitted_by = userId;
     if (!row && table === "content_versions") initial.uploaded_by = userId;
     if (!row && table === "quality_reviews") initial.reviewer_id = userId;
@@ -93,6 +95,35 @@ export function EntityManager({ table, moduleKey, title, eyebrow, description, f
     try { await remove(row.id); } catch (reason) { setMessage(reason instanceof Error ? reason.message : "O‘chirishda xatolik yuz berdi."); }
   }
 
+  async function importFile(file: File) {
+    setMessage("");
+    try {
+      const XLSX = await import("xlsx");
+      const workbook = XLSX.read(await file.arrayBuffer(), { cellDates: true });
+      const sourceRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
+      const normalize = (value: string) => value.toLocaleLowerCase("uz").replace(/[^a-z0-9а-яёқғҳў]+/giu, "");
+      const aliases = new Map(fields.flatMap((field) => [[normalize(field.key), field.key], [normalize(field.label), field.key]]));
+      let added = 0; let skipped = 0;
+      for (const sourceRow of sourceRows) {
+        const mapped: SmartRecord = { id: "" };
+        for (const [sourceKey, value] of Object.entries(sourceRow)) {
+          const target = aliases.get(normalize(sourceKey));
+          if (target) mapped[target] = value as SmartValue;
+        }
+        const missingRequired = fields.some((field) => field.required && field.type !== "file" && !String(mapped[field.key] ?? "").trim());
+        const comparisonKeys = fields.filter((field) => field.required && field.type !== "file").slice(0, 2).map((field) => field.key);
+        const duplicate = rows.some((row) => comparisonKeys.length > 0 && comparisonKeys.every((key) => String(row[key] ?? "").trim().toLocaleLowerCase("uz") === String(mapped[key] ?? "").trim().toLocaleLowerCase("uz")));
+        if (missingRequired || duplicate || Object.keys(mapped).length === 1) { skipped += 1; continue; }
+        const { id: discarded, ...payload } = mapped; void discarded;
+        await create(payload);
+        added += 1;
+      }
+      setMessage(`${added} ta yozuv import qilindi, ${skipped} ta takroriy yoki mos kelmagan qator o‘tkazib yuborildi.`);
+    } catch (reason) {
+      setMessage(reason instanceof Error ? reason.message : "Excel importida xatolik yuz berdi.");
+    }
+  }
+
   async function preview(row: SmartRecord) {
     if (!row.storage_path || !isSupabaseConfigured()) { setMessage(row.file_name ? `Demo rejimida faqat fayl nomi saqlandi: ${row.file_name}` : "Ushbu yozuvga fayl biriktirilmagan."); return; }
     const { data, error: signedError } = await createClient().storage.from("smart-riax-documents").createSignedUrl(String(row.storage_path), 60);
@@ -108,7 +139,9 @@ export function EntityManager({ table, moduleKey, title, eyebrow, description, f
     <div className="animate-enter">
       <PageHeader eyebrow={eyebrow} title={title} description={description} icon={Database} action={
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => downloadExcel(`${table}.xlsx`, title, filtered)} className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#cad8ea] bg-white px-4 text-xs font-black text-[#0a2d70]"><FileSpreadsheet size={17} />Excel</button>
+          <button onClick={() => downloadExcel(`${table}.xlsx`, title, filtered)} className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#cad8ea] bg-white px-3 text-xs font-black text-[#0a2d70]"><FileSpreadsheet size={17} />Excel</button>
+          <button onClick={() => printPdfReport(title, filtered, columns)} className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#cad8ea] bg-white px-3 text-xs font-black text-[#0a2d70]"><FileDown size={17} />PDF</button>
+          {manager && <label className="focus-ring inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-[#cad8ea] bg-white px-3 text-xs font-black text-[#0a2d70]"><Upload size={17}/>Import<input type="file" accept=".xlsx,.xls,.csv" className="sr-only" onChange={(event)=>event.target.files?.[0]&&void importFile(event.target.files[0])}/></label>}
           {manager && <button onClick={() => startEdit()} className="focus-ring inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#08265f] px-4 text-xs font-black text-white"><Plus size={17} />Yangi yozuv</button>}
         </div>
       } />
@@ -125,7 +158,7 @@ export function EntityManager({ table, moduleKey, title, eyebrow, description, f
           <div className="table-scroll"><table className="w-full min-w-[780px] text-left text-xs"><thead className="bg-[#f4f8fd] text-[#62708c]"><tr>
             {columns.map((key) => <th key={key} className="px-4 py-3"><button onClick={() => changeSort(key)} className="font-black">{fieldMap[key]?.label || key} {sortKey === key ? (ascending ? "↑" : "↓") : ""}</button></th>)}<th className="px-4 py-3 text-right">Amallar</th>
           </tr></thead><tbody>{paged.map((row) => <tr key={row.id} className="border-t border-[#e4ebf4] hover:bg-blue-50/40">
-            {columns.map((key) => <td key={key} className="max-w-[280px] px-4 py-3 font-semibold text-[#2d3b58]"><CellValue row={row} fieldKey={key} field={fieldMap[key]} /></td>)}
+            {columns.map((key, index) => <td key={key} className="max-w-[280px] px-4 py-3 font-semibold text-[#2d3b58]"><CellValue row={row} fieldKey={key} field={fieldMap[key]} profileHref={index===0&&profileLinkBase?`${profileLinkBase}/${row.id}`:undefined}/></td>)}
             <td className="px-4 py-3"><div className="flex justify-end gap-1">{(row.file_name || row.storage_path) && <button onClick={() => preview(row)} className="focus-ring grid size-10 place-items-center rounded-xl text-[#0b6fe8] hover:bg-blue-50" aria-label="Faylni ko‘rish"><Eye size={16} /></button>}{manager && <button onClick={() => startEdit(row)} className="focus-ring grid size-10 place-items-center rounded-xl text-[#0b6fe8] hover:bg-blue-50" aria-label="Tahrirlash"><Pencil size={16} /></button>}{manager && <button onClick={() => deleteRow(row)} className="focus-ring grid size-10 place-items-center rounded-xl text-red-600 hover:bg-red-50" aria-label="O‘chirish"><Trash2 size={16} /></button>}</div></td>
           </tr>)}</tbody></table></div>
         )}
@@ -140,7 +173,8 @@ export function EntityManager({ table, moduleKey, title, eyebrow, description, f
   );
 }
 
-function CellValue({ row, fieldKey, field }: { row: SmartRecord; fieldKey: string; field?: SmartField }) {
+function CellValue({ row, fieldKey, field, profileHref }: { row: SmartRecord; fieldKey: string; field?: SmartField; profileHref?: string }) {
+  if (profileHref) return <Link href={profileHref} className="focus-ring rounded font-black text-[#0b6fe8] hover:underline">{displayValue(row[fieldKey],field)}</Link>;
   if (fieldKey === "scopus_author_id") {
     if (!row.scopus_author_id) return <span className="text-[#8793a8]">Mavjud emas</span>;
     if (row.scopus_profile_url) return <a href={String(row.scopus_profile_url)} target="_blank" rel="noreferrer" className="focus-ring inline-flex items-center gap-1 rounded text-[#0b6fe8] hover:underline">{String(row.scopus_author_id)}<ExternalLink size={13}/></a>;

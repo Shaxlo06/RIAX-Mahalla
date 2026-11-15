@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { isUserRole, roleArea, roleHome } from "@/lib/auth";
+import { demoAuthEnabled, isUserRole, roleArea, roleHome } from "@/lib/auth";
 import type { UserRole } from "@/types/domain";
 
 const protectedPrefixes = ["/admin", "/student", "/mahalla", "/faculty", "/publications", "/teaching", "/quality", "/graduates"];
@@ -8,7 +8,7 @@ const protectedPrefixes = ["/admin", "/student", "/mahalla", "/faculty", "/publi
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   let response = NextResponse.next({ request });
-  let role = request.cookies.get("riax_role")?.value as UserRole | undefined;
+  let role = demoAuthEnabled ? request.cookies.get("riax_role")?.value as UserRole | undefined : undefined;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;

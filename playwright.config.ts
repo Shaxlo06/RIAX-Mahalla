@@ -22,5 +22,9 @@ export default defineConfig({
     url: "http://localhost:3000/login",
     reuseExistingServer: true,
     timeout: 120_000,
+    env: {
+      ...process.env,
+      NEXT_PUBLIC_DEMO_MODE: "true",
+    },
   },
 });

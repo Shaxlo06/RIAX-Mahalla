@@ -9,6 +9,9 @@ export type DemoUser = {
   title: string;
 };
 
+export const demoAuthEnabled = process.env.NEXT_PUBLIC_DEMO_MODE === "true" &&
+  (process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_ALLOW_PRODUCTION_DEMO_AUTH === "true");
+
 export const demoUsers: DemoUser[] = [
   { id: "demo-admin", name: "Kafedra mudiri", email: "admin@riax.uz", password: "Demo123!", role: "admin", title: "Admin / kafedra mudiri" },
   { id: "demo-super-admin", name: "SMART RIAX Super Admin", email: "superadmin@riax.uz", password: "Demo123!", role: "super_admin", title: "Super Admin" },
