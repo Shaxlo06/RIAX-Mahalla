@@ -49,11 +49,11 @@ test("sidebar accordion submenyulari va TDIU rasmi ishlaydi",async({page})=>{
   const graduates=sidebar.getByRole("button",{name:/Bitiruvchilar/});await graduates.click();await expect(graduates).toHaveAttribute("aria-expanded","true");
   await expect(sidebar.getByRole("link",{name:"Amaliyot"})).toBeVisible();await expect(sidebar.getByRole("link",{name:"BMI"})).toBeVisible();await expect(sidebar.getByRole("link",{name:"YADK"})).toBeVisible();
   await sidebar.getByRole("link",{name:"BMI"}).click();await expect(page).toHaveURL(/\/graduates\/theses$/);
-  await expect(sidebar.getByRole("img",{name:"Toshkent davlat iqtisodiyot universiteti binosi"})).toBeVisible();await expect(sidebar.getByText("5 yo‘nalishli monitoring")).toBeVisible();
-  await noOverflow(page);
+  await expect(sidebar.getByRole("img",{name:"Toshkent davlat iqtisodiyot universiteti binosi"})).toBeVisible();await expect(sidebar.getByText("5 yo‘nalishli monitoring")).toHaveCount(0);
+  await noOverflow(page);await page.screenshot({path:"artifacts/screenshots/sidebar-desktop-1440.png",fullPage:true,animations:"disabled"});
 
   await page.setViewportSize({width:390,height:844});await page.goto("/admin");const drawer=await openMobileDrawer(page);
-  await expect(drawer.getByRole("img",{name:"Toshkent davlat iqtisodiyot universiteti binosi"})).toBeAttached();await expect(drawer.getByText("5 yo‘nalishli monitoring")).toBeAttached();
+  await expect(drawer.getByRole("img",{name:"Toshkent davlat iqtisodiyot universiteti binosi"})).toBeAttached();await expect(drawer.getByText("5 yo‘nalishli monitoring")).toHaveCount(0);
   await drawer.screenshot({path:"artifacts/screenshots/sidebar-mobile-390.png",animations:"disabled"});
 });
 
@@ -81,3 +81,13 @@ test("Scopus Excel manbasidagi barcha professorlar ko‘rsatiladi",async({page})
 });
 
 test("SMART RIAX nomi va subtitle barcha ekranlarda saqlangan",async({page})=>{const subtitle="Aqlli Kafedra - Raqamli iqtisodiyot va axborot xavfsizligi kafedrasining raqamli monitoringi";for(const width of [320,1440]){await page.setViewportSize({width,height:width===320?844:900});await page.context().clearCookies();await page.goto("/login");await expect(page).toHaveTitle("SMART RIAX");await expect(page.getByText(subtitle,{exact:true}).filter({visible:true}).first()).toBeVisible();await loginAs(page,"admin");await page.goto("/admin");await expect(page.locator("main").getByText(subtitle,{exact:true})).toBeVisible();await noOverflow(page)}});
+
+test("desktop dashboard bir ekranga sig‘adi va kafedra logotipi ishlaydi",async({page})=>{
+  for(const viewport of [{width:1024,height:768},{width:1366,height:768},{width:1440,height:900}]){
+    await page.setViewportSize(viewport);await loginAs(page,"admin");await page.goto("/admin");
+    const logo=page.getByRole("link",{name:"SMART RIAX Dashboard sahifasi"});await expect(logo).toBeVisible();await expect(logo.getByRole("img",{name:"Raqamli iqtisodiyot va axborot xavfsizligi kafedrasi logotipi"})).toBeVisible();
+    const dimensions=await page.evaluate(()=>({viewport:window.innerHeight,document:document.documentElement.scrollHeight,body:document.body.scrollHeight}));
+    expect(dimensions.document,JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport+1);expect(dimensions.body,JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport+1);
+    await page.screenshot({path:`artifacts/screenshots/dashboard-fit-${viewport.width}x${viewport.height}.png`,fullPage:true,animations:"disabled"});
+  }
+});

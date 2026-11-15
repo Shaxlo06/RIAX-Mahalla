@@ -99,14 +99,13 @@ export function AppShell({ children, role, name, userId }: { children: React.Rea
           </div>;
         })}
       </nav>
-      <div className="mt-auto space-y-2 px-3 pb-3">
-        <div className="pointer-events-none relative aspect-[16/10] select-none overflow-hidden rounded-2xl border border-white/10 bg-[#061b4f] shadow-lg shadow-black/20">
-          <Image src="/images/tdiu-building.jpg" alt="Toshkent davlat iqtisodiyot universiteti binosi" fill sizes="(max-width: 1023px) min(286px, calc(100vw - 28px)), 252px" className="object-cover object-[50%_78%]"/>
+      <div className="mt-auto px-3 pb-3">
+        <div className="pointer-events-none relative select-none overflow-hidden rounded-2xl border border-white/10 bg-[#061b4f] shadow-lg shadow-black/20">
+          <Image src="/images/tdiu-building.jpg" alt="Toshkent davlat iqtisodiyot universiteti binosi" width={3044} height={4480} sizes="(max-width: 1023px) min(286px, calc(100vw - 28px)), 252px" className="h-auto w-full object-contain"/>
           <div className="absolute inset-0 bg-gradient-to-t from-[#03102f]/95 via-[#061b4f]/45 to-[#061b4f]/10"/>
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#f2b705] to-transparent"/>
           <p className="absolute inset-x-3 bottom-2 text-[10px] font-extrabold tracking-wide text-white/90">TDIU bosh binosi</p>
         </div>
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/8 p-4"><div className="absolute -right-7 -top-7 size-24 rounded-full bg-[#f2b705]/20 blur-xl"/><p className="relative text-xs font-extrabold text-[#ffd85a]">5 yo‘nalishli monitoring</p><p className="relative mt-1 text-[11px] leading-relaxed text-blue-100">Kafedraning ta’lim, ilmiy va bitiruv jarayonlari yagona tizimda.</p></div>
       </div>
     </div>
   </aside>;
