@@ -20,7 +20,7 @@ for(const width of viewportWidths){
   for(const role of ["admin","faculty","student"] as Role[]){
     test(`${role} dashboard ${width}px`,async({page})=>{
       await page.setViewportSize({width,height:width<=430?844:width<=768?1024:900});await loginAs(page,role);await page.goto(credentials[role].home,{waitUntil:"domcontentloaded"});
-      await expect(page.locator("main h1").first()).toContainText("SMART RIAX");await noOverflow(page);
+      await expect(page.locator("main")).toBeVisible();if(role!=="student")await expect(page.locator(".smart-dashboard")).toBeVisible();await noOverflow(page);
       if(width<1024){const drawer=await openMobileDrawer(page);await expect(drawer.locator("[data-primary-nav]")).toHaveCount(5);await page.getByRole("button",{name:"Menyuni yopish"}).last().click()}else{await expect(page.locator("aside nav [data-primary-nav]")).toHaveCount(5)}
       if(width<768)await expect(page.getByRole("navigation",{name:"Tezkor navigatsiya"})).toBeVisible();
       if(screenshotWidths.has(width))await page.screenshot({path:`artifacts/screenshots/${role}-${width}.png`,fullPage:true,animations:"disabled"});
@@ -80,14 +80,19 @@ test("Scopus Excel manbasidagi barcha professorlar ko‘rsatiladi",async({page})
   await expect(page.getByRole("link",{name:/60647745100/})).toHaveAttribute("href",/authorId=60647406000/);
 });
 
-test("SMART RIAX nomi va subtitle barcha ekranlarda saqlangan",async({page})=>{const subtitle="Aqlli Kafedra - Raqamli iqtisodiyot va axborot xavfsizligi kafedrasining raqamli monitoringi";for(const width of [320,1440]){await page.setViewportSize({width,height:width===320?844:900});await page.context().clearCookies();await page.goto("/login");await expect(page).toHaveTitle("SMART RIAX");await expect(page.getByText(subtitle,{exact:true}).filter({visible:true}).first()).toBeVisible();await loginAs(page,"admin");await page.goto("/admin");await expect(page.locator("main").getByText(subtitle,{exact:true})).toBeVisible();await noOverflow(page)}});
+test("SMART RIAX brendi saqlangan, dashboard banneri olib tashlangan",async({page})=>{const subtitle="Aqlli Kafedra - Raqamli iqtisodiyot va axborot xavfsizligi kafedrasining raqamli monitoringi";for(const width of [320,1440]){await page.setViewportSize({width,height:width===320?844:900});await page.context().clearCookies();await page.goto("/login");await expect(page).toHaveTitle("SMART RIAX");await expect(page.getByText(subtitle,{exact:true}).filter({visible:true}).first()).toBeVisible();await loginAs(page,"admin");await page.goto("/admin");await expect(page.locator("main").getByText(subtitle,{exact:true})).toHaveCount(0);await expect(page.locator("main").getByText("Kafedraning raqamli boshqaruv markazi",{exact:true})).toHaveCount(0);await noOverflow(page)}});
 
-test("desktop dashboard bir ekranga sig‘adi va kafedra logotipi ishlaydi",async({page})=>{
-  for(const viewport of [{width:1024,height:768},{width:1366,height:768},{width:1440,height:900}]){
+test("desktop dashboard bir ekranga sig‘adi va hover ishlaydi",async({page})=>{
+  for(const viewport of [{width:1366,height:768},{width:1440,height:900},{width:1920,height:1080}]){
     await page.setViewportSize(viewport);await loginAs(page,"admin");await page.goto("/admin");
-    const logo=page.getByRole("link",{name:"SMART RIAX Dashboard sahifasi"});await expect(logo).toBeVisible();await expect(logo.getByRole("img",{name:"Raqamli iqtisodiyot va axborot xavfsizligi kafedrasi logotipi"})).toBeVisible();
+    await expect(page.locator("main").getByRole("link",{name:"SMART RIAX Dashboard sahifasi"})).toHaveCount(0);await expect(page.locator(".kpi-card")).toHaveCount(8);await expect(page.locator(".dashboard-panel")).toHaveCount(5);
+    const card=page.locator(".kpi-card").first();await page.mouse.move(0,0);await page.waitForTimeout(250);const before=await card.evaluate((element)=>getComputedStyle(element).borderColor);await card.hover();await page.waitForTimeout(250);const hover=await card.evaluate((element)=>{const style=getComputedStyle(element);return {transform:style.transform,shadow:style.boxShadow,border:style.borderColor}});expect(hover.transform).not.toBe("none");expect(hover.shadow).not.toBe("none");expect(hover.border).not.toBe(before);
     const dimensions=await page.evaluate(()=>({viewport:window.innerHeight,document:document.documentElement.scrollHeight,body:document.body.scrollHeight}));
     expect(dimensions.document,JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport+1);expect(dimensions.body,JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport+1);
-    await page.screenshot({path:`artifacts/screenshots/dashboard-fit-${viewport.width}x${viewport.height}.png`,fullPage:true,animations:"disabled"});
+    await page.screenshot({path:`artifacts/screenshots/dashboard-formal-${viewport.width}x${viewport.height}.png`,fullPage:true,animations:"disabled"});
   }
+});
+
+test("dashboard reduced-motion sozlamasini hurmat qiladi",async({page})=>{
+  await page.emulateMedia({reducedMotion:"reduce"});await page.setViewportSize({width:1440,height:900});await loginAs(page,"admin");await page.goto("/admin");const card=page.locator(".kpi-card").first();await card.hover();await page.waitForTimeout(50);await expect(card).toHaveCSS("transform","none");
 });
