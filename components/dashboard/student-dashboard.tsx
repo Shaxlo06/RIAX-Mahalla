@@ -1,0 +1,19 @@
+"use client";
+
+import { CalendarRange, FolderKanban, MapPin, Target, Users } from "lucide-react";
+import { KpiCard } from "@/components/ui/kpi-card";
+import { BrandName } from "@/components/ui/brand-name";
+import { StageJourney } from "@/components/projects/stage-journey";
+import { demoProjects } from "@/lib/project-data";
+import type { StudentRecord } from "@/types/domain";
+
+export function StudentDashboard({ student, groupCount }: { student: StudentRecord; groupCount: number }) {
+  const project = demoProjects[0];
+  return <div className="animate-enter space-y-5">
+    <section className="glass-dark grid-sheen relative overflow-hidden rounded-[30px] p-6 text-white sm:p-8"><span className="absolute -right-20 -top-28 size-72 rounded-full border-[30px] border-[#f2b705]/80"/><div className="relative max-w-3xl"><p className="text-xs font-black uppercase tracking-[.18em] text-[#ffd34d]"><BrandName/> · Talaba kabineti</p><h1 className="font-display mt-2 text-4xl font-black sm:text-5xl">Assalomu alaykum, {student.fullName.split(" ")[0]}!</h1><p className="mt-4 max-w-2xl text-sm font-semibold text-blue-100">Mahalla amaliyotingiz, loyiha vazifalari va rahbar fikrlarini bitta joydan kuzating.</p></div></section>
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><KpiCard label="Mening guruhim" value={student.group} hint={`${groupCount} nafar talaba`} icon={Users} variant="gold"/><KpiCard label="Loyiha progressi" value={`${project.progress}%`} icon={Target} variant="blue"/><KpiCard label="Joriy bosqich" value="5 / 8" icon={FolderKanban} variant="violet"/><KpiCard label="Amaliyot davri" value="16 hafta" icon={CalendarRange} variant="mint"/></div>
+    <div className="grid gap-4 xl:grid-cols-[1.25fr_.75fr]"><article className="panel rounded-[26px] p-5 sm:p-6"><p className="text-[10px] font-black uppercase tracking-[.2em] text-[#0b6fe8]">Mening loyiham</p><h2 className="font-display mt-2 text-3xl font-black text-[#10244b]">{project.title}</h2><p className="mt-3 text-sm font-semibold leading-relaxed text-[#65728a]">Mahalladagi murojaatlarni tasniflash, mas’ullarga yo‘naltirish va natijani raqamli nazorat qilish tizimi.</p><div className="mt-6 flex items-center justify-between text-xs font-bold"><span>Umumiy bajarilish</span><span>{project.progress}%</span></div><div className="mt-2 h-3 overflow-hidden rounded-full bg-[#e4ecf6]"><div className="h-full rounded-full bg-gradient-to-r from-[#0b6fe8] via-[#18a4e7] to-[#43d17a]" style={{width:`${project.progress}%`}}/></div></article><article className="glass-dark rounded-[26px] p-6 text-white"><MapPin className="text-[#f2b705]"/><p className="mt-5 text-[10px] font-black uppercase tracking-[.2em] text-blue-200">Biriktirilgan mahalla</p><h2 className="font-display mt-2 text-3xl font-black">{student.mahallaName ? `${student.mahallaName} MFY` : "Yorqin hayot MFY"}</h2><p className="mt-3 text-sm text-blue-100">{student.district || "Sergeli tumani"} · {student.region}</p><div className="mt-6 border-t border-white/10 pt-4 text-xs"><span className="text-blue-200">Rahbar</span><b className="mt-1 block text-[#ffd34d]">{student.supervisorName}</b></div></article></div>
+    <StageJourney currentStage={project.currentStage}/>
+    <div className="grid gap-4 lg:grid-cols-3">{[{t:"Asosiy yo‘nalish",v:"Raqamli xizmatlar",d:"Aholi murojaatlari bilan ishlash"},{t:"Rahbar fikri",v:"Ijobiy",d:"Prototipni mahallada sinovdan o‘tkazing"},{t:"Kutilayotgan natija",v:"30% tezroq",d:"Murojaatlarni qayta ishlash vaqti"}].map(item=><article key={item.t} className="panel rounded-2xl p-5"><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#71809a]">{item.t}</p><strong className="font-display mt-3 block text-3xl text-[#08265f]">{item.v}</strong><p className="mt-2 text-xs font-semibold text-[#66738b]">{item.d}</p></article>)}</div>
+  </div>;
+}

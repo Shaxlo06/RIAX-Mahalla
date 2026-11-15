@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#041b58">
+  <meta name="description" content="Aqlli Kafedra - Raqamli iqtisodiyot va axborot xavfsizligi kafedrasining raqamli monitoringi">
+  <title>SMART RIAX</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="TSUE bosh sahifa">
+      <span class="brand-seal"><img src="TDIU%20logo.png" alt="Toshkent davlat iqtisodiyot universiteti logotipi"></span>
+      <span class="brand-rule" aria-hidden="true"></span>
+      <span class="brand-name">Toshkent davlat<br>iqtisodiyot universiteti <b>(TSUE)</b></span>
+    </a>
+    <div class="account">
+      <button class="icon-btn notification" type="button" aria-label="Bildirishnomalar"><span aria-hidden="true">♢</span><i></i></button>
+      <span class="account-rule"></span>
+      <span class="avatar" aria-hidden="true">♙</span>
+      <button class="account-button" type="button">Kafedra mudiri <span aria-hidden="true">⌄</span></button>
+    </div>
+  </header>
+
+  <button class="mobile-menu" type="button" aria-controls="sidebar" aria-expanded="false"><span></span><span></span><span></span><b>Menyu</b></button>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <nav aria-label="Asosiy navigatsiya">
+        <a class="nav-link active" href="#dashboard"><span class="nav-icon">⌂</span>Bosh sahifa</a>
+        <a class="nav-link" href="#students"><span class="nav-icon">♟</span>Talabalar</a>
+        <a class="nav-link" href="#groups"><span class="nav-icon">◇</span>Akademik guruhlar</a>
+        <a class="nav-link" href="#locations"><span class="nav-icon">●</span>Amaliyot manzillari</a>
+        <a class="nav-link" href="#leaders"><span class="nav-icon">♙</span>Rahbarlar</a>
+        <a class="nav-link" href="#areas"><span class="nav-icon">▱</span>Hududlar</a>
+        <a class="nav-link" href="#analytics"><span class="nav-icon">↗</span>Analitika</a>
+        <a class="nav-link" href="#reports"><span class="nav-icon">▤</span>Hisobotlar</a>
+      </nav>
+      <div class="campus-art" role="img" aria-label="Toshkent davlat iqtisodiyot universiteti binosi">
+        <div class="campus-label">Toshkent davlat<br>iqtisodiyot universiteti</div>
+      </div>
+    </aside>
+
+    <main class="main" id="dashboard">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <h1 id="hero-title"><span class="smart">SMART</span> <span>RIAX</span></h1>
+          <p>Aqlli Kafedra - Raqamli iqtisodiyot va axborot xavfsizligi kafedrasining raqamli monitoringi</p>
+        </div>
+        <div class="department-seal"><img src="RIAX%20logo.jpg" alt="Raqamli iqtisodiyot va axborot xavfsizligi kafedrasi logotipi"></div>
+        <div class="wave wave-one"></div><div class="wave wave-two"></div>
+      </section>
+
+      <section class="stats" aria-label="Asosiy ko‘rsatkichlar">
+        <article class="stat-card stat-gold"><div class="stat-icon">♟</div><div><span>Talabalar</span><strong data-counter="168">168</strong></div></article>
+        <article class="stat-card stat-blue"><div class="stat-icon">◇</div><div><span>Akademik guruhlar</span><strong data-counter="7">7</strong></div></article>
+        <article class="stat-card stat-purple"><div class="stat-icon">♙</div><div><span>Rahbarlar</span><strong data-counter="15">15</strong></div></article>
+        <article class="stat-card stat-green"><div class="stat-icon">●</div><div><span>MFY qaydli manzillar</span><strong data-counter="135">135</strong></div></article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel groups-panel" id="groups">
+          <h2><span class="gold">▥</span> Guruhlar bo‘yicha talabalar</h2>
+          <div class="bar-chart" aria-label="Guruhlar bo‘yicha talabalar soni">
+            <div class="y-axis"><span>35</span><span>30</span><span>25</span><span>20</span><span>15</span><span>10</span><span>5</span><span>0</span></div>
+            <div class="bars">
+              <div class="bar-item"><b>31</b><i style="--value:88.6%"></i><span>IB-75/23</span></div>
+              <div class="bar-item"><b>28</b><i style="--value:80%"></i><span>BET-76/23</span></div>
+              <div class="bar-item"><b>28</b><i style="--value:80%"></i><span>BET-75/23</span></div>
+              <div class="bar-item"><b>27</b><i style="--value:77.1%"></i><span>RI-75/23</span></div>
+              <div class="bar-item"><b>22</b><i style="--value:62.8%"></i><span>RI-76/23</span></div>
+              <div class="bar-item"><b>17</b><i style="--value:48.5%"></i><span>RI-70/23i</span></div>
+              <div class="bar-item"><b>15</b><i style="--value:42.8%"></i><span>RI-25/23r</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel active-panel" id="students">
+          <h2><span class="gold">♟</span> Hududlar bo‘yicha talabalar (top 5)</h2>
+          <div class="horizontal-chart">
+            <div class="h-row"><span>Toshkent shahri</span><i style="--w:100%"></i><b>33</b></div>
+            <div class="h-row"><span>Toshkent viloyati</span><i style="--w:64%"></i><b>21</b></div>
+            <div class="h-row"><span>Qashqadaryo viloyati</span><i style="--w:42%"></i><b>14</b></div>
+            <div class="h-row"><span>Jizzax viloyati</span><i style="--w:42%"></i><b>14</b></div>
+            <div class="h-row"><span>Qoraqalpog‘iston<br>Respublikasi</span><i style="--w:42%"></i><b>14</b></div>
+          </div>
+        </article>
+
+        <article class="panel map-panel" id="locations">
+          <h2><span class="teal">▥</span> Mahalla manzillari</h2>
+          <div class="map-art" aria-label="Mahalla manzillari xaritasi">
+            <i class="road r1"></i><i class="road r2"></i><i class="road r3"></i><i class="road r4"></i>
+            <span class="map-pin p1">●</span><span class="map-pin p2">●</span><span class="map-pin p3">●</span><span class="map-pin p4">●</span><span class="map-pin p5">●</span><span class="map-pin p6">●</span>
+          </div>
+        </article>
+
+        <article class="panel process-panel">
+          <h2><span class="gold">⚙</span> Amaliyot jarayoni (monitoring)</h2>
+          <div class="process">
+            <div><i class="step blue">▱</i><b>Talaba</b></div><span>➜</span>
+            <div><i class="step yellow">●</i><b>Mahalla<br>manzili</b></div><span>➜</span>
+            <div><i class="step blue">♙</i><b>Rahbar</b></div><span>➜</span>
+            <div><i class="step green">↗</i><b>Natija</b></div>
+          </div>
+        </article>
+
+        <article class="panel projects-panel" id="leaders">
+          <h2><span class="gold">▰</span> Amaliyot rahbarlari (top 5)</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>№</th><th>Amaliyot rahbari</th><th>Talabalar</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>DSc. Professor Abidov A.</td><td><span class="leader-count">28</span></td></tr>
+              <tr><td>2</td><td>PhD, dotsent Qulmatova S.</td><td><span class="leader-count">22</span></td></tr>
+              <tr><td>3</td><td>DSc. Professor Kuchkarov T.</td><td><span class="leader-count">17</span></td></tr>
+              <tr><td>4</td><td>Dotsent Shoaxmedova N.</td><td><span class="leader-count">16</span></td></tr>
+              <tr><td>5</td><td>PhD, dotsent Umarov O.</td><td><span class="leader-count">14</span></td></tr>
+            </tbody>
+          </table><p class="source-note">Manba: RIAX.xlsx, “МФЙ Дуал таълим” varag‘i</p></div>
+        </article>
+
+        <article class="panel phone-panel">
+          <h2><span class="info">i</span> Telefon raqami mavjud bo‘lmagan talabalar</h2>
+          <div><strong data-counter="30">30</strong><span class="phone-off">▱<i>/</i></span></div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

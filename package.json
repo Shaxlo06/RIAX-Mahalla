@@ -1,0 +1,48 @@
+{
+  "name": "riax-talaba-mahalla",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:responsive": "playwright test",
+    "import:excel": "tsx scripts/import-riax.ts",
+    "import:faculty": "node scripts/import-faculty.mjs",
+    "seed:sql": "tsx scripts/import-riax.ts --sql-only",
+    "locations:sync": "tsx scripts/build-mahalla-locations.ts"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.119.0",
+    "clsx": "^2.1.1",
+    "jszip": "^3.10.1",
+    "leaflet": "^1.9.4",
+    "lucide-react": "1.73.0",
+    "next": "16.4.6",
+    "pdf-lib": "^1.17.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-hook-form": "7.92.0",
+    "recharts": "3.10.1",
+    "tailwind-merge": "^3.4.0",
+    "xlsx": "0.18.5",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "16.4.6",
+    "tailwindcss": "4.3.5",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
